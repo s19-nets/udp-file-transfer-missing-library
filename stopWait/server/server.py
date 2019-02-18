@@ -1,4 +1,6 @@
 #! /usr/bin/env python3
+# A simple program implementing a server for a basic file transfer.
+
 import sys
 from socket import *
 import sys, os, re
