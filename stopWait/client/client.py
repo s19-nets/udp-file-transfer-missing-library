@@ -9,23 +9,30 @@ sAddr = ('localhost',50000)
 
 # Client socket
 cSocket = socket(AF_INET, SOCK_DGRAM)
+request = "none"
 
-print("Requesting file: foo.txt.")
-reqFilename = "foo.txt"
 
-# Send the name of the file to the server.
-cSocket.sendto(reqFilename.encode(),sAddr)
+while (request is not "exit"):
 
-# Recieve the first line of the file!
-response, addr = cSocket.recvfrom(100)
+    request = input("Request a file from the server: ") 
 
-# Create a copy of the file.
-reqFile = open(reqFilename, "w")
-print("Downloading file...")
+    print("Requesting file: ",request)
+    reqFilename = request
 
-# Recieve file line by line 'till server says it's done.
-while response.decode() != "good":
-    reqFile.write(response.decode())
+    # Send the name of the file to the server.
+    cSocket.sendto(reqFilename.encode(),sAddr)
+
+    # Recieve the first line of the file!
     response, addr = cSocket.recvfrom(100)
 
-print("File recieved!")
+    # Create a copy of the file.
+    reqFile = open(reqFilename, "w")
+    print("Downloading file...")
+
+    # Recieve file line by line 'till server says it's done.
+    while response.decode() != "good":
+        reqFile.write(response.decode())
+        response, addr = cSocket.recvfrom(100)
+        cSocket.sendto("Woo!".encode(),sAddr)
+
+    print("File recieved!")
