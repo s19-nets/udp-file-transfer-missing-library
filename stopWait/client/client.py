@@ -2,7 +2,7 @@
 # Simple client program for getting a file from a server.
 
 from socket import *
-import sys, re, os
+import sys, re, os, time
 
 # Default server address
 sAddr = ('localhost',50000)
@@ -29,10 +29,15 @@ while (request is not "exit"):
     reqFile = open(reqFilename, "w")
     print("Downloading file...")
 
+    ack = "Woo!"
+    
     # Recieve file line by line 'till server says it's done.
     while response.decode() != "good":
         reqFile.write(response.decode())
         response, addr = cSocket.recvfrom(100)
-        cSocket.sendto("Woo!".encode(),sAddr)
+        #print("Sending...")
+        #time.sleep(2)
+        #cSocket.sendto(ack.encode(),sAddr)
+        #print("Loop done!")
 
     print("File recieved!")

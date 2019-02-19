@@ -3,7 +3,7 @@
 
 import sys
 from socket import *
-import sys, os, re
+import sys, os, re, time
 
 # The address and port of the server - socket, too
 sAddr = ("",50000)
@@ -16,6 +16,8 @@ print("Binding...")
 sSocket.bind(sAddr)
 print("Ready for request.")
 
+
+
 #Wait for client to request file.
 while reqFilename == "":
     request, cAddr = sSocket.recvfrom(100)
@@ -24,9 +26,13 @@ while reqFilename == "":
 
 # Open the file and send it to client line by line.
 reqFile = open(reqFilename, "r")
+ack = "" #confirm acknowledge; this means the line got there!
 
 for line in reqFile:
     sSocket.sendto(line.encode(), cAddr)
+    #print("Waiting for the 'Woo!'")
+    #ack = sSocket.recvfrom(100)
+    
 
 sSocket.sendto(b'good', cAddr) # Let client know it's over!
 print("File sent.")
