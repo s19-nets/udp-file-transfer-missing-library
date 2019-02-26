@@ -16,8 +16,6 @@ print("Binding...")
 sSocket.bind(sAddr)
 print("Ready for request.")
 
-
-
 #Wait for client to request file.
 while reqFilename == "":
     request, cAddr = sSocket.recvfrom(100)
@@ -30,7 +28,7 @@ ack = "" #confirm acknowledge; this means the line got there!
 
 for line in reqFile:
     sSocket.sendto(line.encode(), cAddr)
-    #print("Waiting for the 'Woo!'")
+    print("Waiting for ACK.")
     #ack = sSocket.recvfrom(100)
     
 
