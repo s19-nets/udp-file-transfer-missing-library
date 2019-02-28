@@ -14,23 +14,30 @@ sAddr = ('localhost',50000)
 cSocket = socket(AF_INET, SOCK_DGRAM)
 cSocket.setblocking(False)
 request = "none"
-
+ack = "ACKN"
 
 
 def getting(cSocket, reqFile):
+    ack = "ACKN"
     response, addr = cSocket.recvfrom(100)
+    if response.decode() == "#":
+        print("File complete! Exiting...")
+        exit()
+        
     reqFile.write(response.decode())
-    sending("ACK", addr)
+    sending(ack.encode(), addr)
     
-def sending(sock):
+def sending(sock,reqFile):
+    ack = "ACKN"
     print("Sending ACK")
-    cSocket.sendto(b'ACK', sAddr)
+    cSocket.sendto(ack.encode(), sAddr)
     status = 'sentMsg'
 
 
 request = input("Request a file from the server: ") 
 print("Requesting file: ",request)
 reqFilename = request
+
 
 # Create a copy of the file.
 reqFile = open(reqFilename, "w")
@@ -44,7 +51,7 @@ timeout = 5
 tryCounter = 0
 
 readSelect[cSocket] = getting
-#sendSelect[cSocket] = sending
+#sendSelect[cSocket] = sending //non-operational
 
 status = 'firstMsg'
 while 1:
@@ -62,14 +69,16 @@ while 1:
             
         if tryCounter != 3 and status == "downloading":
             print("timeout. Retransmitting.")
-            cSocket.sendto(b'ACK', sAddr)
+            tryCounter+=1
+            cSocket.sendto(ack.encode(), sAddr)
             
         if tryCounter == 3:
             print("No response. Exiting...")
-            break
+            exit()
             
     for sock in rReady:
         print("Message recieved.")
         tryCounter = 0
         status = "downloading"
-        readSelect[cSocket](sock)
+        readSelect[cSocket](sock,reqFile)
+        
