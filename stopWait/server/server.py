@@ -50,7 +50,7 @@ sSocket.sendto(line.encode(), cAddr)
 print("sent %s" % line)
 status = "sentMsg" #possible states: sending, sentMsg
 
-while 1:
+for line in reqFile:
     rReady, sReady, error = select( list(readSelect.keys()),
                                     list(sendSelect.keys()),
                                     list(errSelect.keys()),
@@ -72,18 +72,14 @@ while 1:
         tries = 0
         seqNumber += 1
         readSelect[sSocket](sock)
-        line = reqFile.readline()
-            
-        if line.strip() == "":
-            print("File sent. Sending end symbol...")
-            sSocket.sendto("#".encode(),cAddr)
-            exit()
-
         
         line = str(seqNumber) +":5:"+line
         sSocket.sendto(line.encode(), cAddr)
             
-    
+print("File sent. Sending end symbol...")
+sSocket.sendto("#".encode(),cAddr)
+exit()
+
 
         
 
