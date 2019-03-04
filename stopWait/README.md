@@ -21,7 +21,7 @@ This folder contains:
 3. The client will prompt you to request a file. There are two files on the server:
 ~~~
 foo.txt
-El-Ahrairah.txt
+story.txt
 ~~~
 Entering either one will begin the transfer.
 

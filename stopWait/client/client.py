@@ -6,54 +6,52 @@ import sys, re, os, time
 from select import select
 
 global status
+global ack
+global ackCounter
+global reqFilename
 
 # Default server address
 sAddr = ('localhost',50000)
 
 # Client socket
 cSocket = socket(AF_INET, SOCK_DGRAM)
-cSocket.setblocking(False)
 request = "none"
-ack = "ACKN"
-
+cSocket.setblocking(False)
 
 def getting(cSocket, reqFile):
-    ack = "ACKN"
+    ack = str(ackCounter)+":100:"+ "ACKN"
     response, addr = cSocket.recvfrom(100)
+    print("Recieved " + str(response))
+    
     if response.decode() == "#":
         print("File complete! Exiting...")
         exit()
         
     reqFile.write(response.decode())
-    sending(ack.encode(), addr)
-    
-def sending(sock,reqFile):
-    ack = "ACKN"
-    print("Sending ACK")
+    print("Sending " + ack)
     cSocket.sendto(ack.encode(), sAddr)
-    status = 'sentMsg'
+    status = "downloading"
 
-
+ackCounter = 0
 request = input("Request a file from the server: ") 
 print("Requesting file: ",request)
-reqFilename = request
-
+reqFilename = str(ackCounter) + ":100:" + request
+print("sending " + reqFilename)
 
 # Create a copy of the file.
-reqFile = open(reqFilename, "w")
+reqFile = open(request, "w")
 print("Downloading file...")
 status = "idle"
 
 readSelect = {}
-sendSelect = {}
+sendSelect = {} # NOT USED.
 errSelect = {}
 timeout = 5
 tryCounter = 0
 
 readSelect[cSocket] = getting
-#sendSelect[cSocket] = sending //non-operational
-
 status = 'firstMsg'
+
 while 1:
     rReady, sReady, error = select(list(readSelect.keys()),
                           list(sendSelect.keys()),
@@ -77,8 +75,7 @@ while 1:
             exit()
             
     for sock in rReady:
-        print("Message recieved.")
         tryCounter = 0
+        ackCounter += 1
         status = "downloading"
         readSelect[cSocket](sock,reqFile)
-        

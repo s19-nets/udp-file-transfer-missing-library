@@ -5,6 +5,8 @@ import sys
 from socket import *
 import sys, os, re, time
 
+global seqNumber
+
 # The address and port of the server - socket, too
 sAddr = ("",50000)
 srSocket = ("",500001)
@@ -19,11 +21,10 @@ sSocket.bind(sAddr)
 print("Ready for request.")
 
 #Wait for client to request file.
-while reqFilename == "":
-    request, cAddr = sSocket.recvfrom(100)
-    print("from %s: rec'd <%s>" % (repr(cAddr), repr(request)))
-    reqFilename = request.decode()
-
+request, cAddr = sSocket.recvfrom(100)
+print("from %s: rec'd <%s>" % (repr(cAddr), repr(request)))
+seqNumber, msgLen, reqFilename = request.decode().split(':')
+print("SEQ:" + seqNumber)
 # Open the file and send it to client line by line.
 reqFile = open(reqFilename, "r")
 
@@ -34,38 +35,23 @@ tries = 0 #if tries == 3, exit program
 line = reqFile.readline()
 
 while line.strip() != "":
-
+    line = str(seqNumber) + ":" + str(len(line.encode())) + ":" + line
+    print ("Sending " + line)
     sSocket.sendto(line.encode(),cAddr)
 
-    print("Segment sent. Waiting for acknowledgement...")
-
     status = "sentMsg"
-    
-    while status == "sentMsg":
-        ackn,addr = sSocket.recvfrom(100)
-        ackn = ackn.decode()
-        if ackn == "ACKN": #wait for acknowledgement
-            print("%s recieved." % ackn)
-            status == "sending"
-            break #if ACK recieved, break the loop
-        time.sleep(5)
-        if tries == 3:
-            print("Connection failed. Exiting...")
-            exit
-
-        tries+=1
-        print("Timeout. Resending...")
-        sSocket.sendto(line.encode(),cAddr)
-
+    ackn,addr = sSocket.recvfrom(100)
+    ackn = ackn.decode()
+        
+    print("%s recieved." % ackn)
+    status == "sending"
     line = reqFile.readline()
+    seqNumber = int(seqNumber)
+    seqNumber += 1
 
 print("File sent. Sending end symbol...")
 sSocket.sendto("#".encode(),cAddr)
 status = "end"
-
-#while status == "end":
-    #sSocket.recvfrom(100)
-
 
         
 
