@@ -8,7 +8,6 @@ from select import select
 global status
 global ack
 global ackCounter
-global reqFilename
 
 # Default server address
 sAddr = ('localhost',50000)
@@ -47,7 +46,7 @@ readSelect = {}
 sendSelect = {} # NOT USED.
 errSelect = {}
 timeout = 5
-tryCounter = 0
+tryCounter = 0 # if tries == 3, give up
 
 readSelect[cSocket] = getting
 status = 'firstMsg'
@@ -68,6 +67,7 @@ while 1:
         if tryCounter != 3 and status == "downloading":
             print("timeout. Retransmitting.")
             tryCounter+=1
+            ack = str(ackCounter)+":100:"+ "ACKN"
             cSocket.sendto(ack.encode(), sAddr)
             
         if tryCounter == 3:
