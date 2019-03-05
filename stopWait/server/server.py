@@ -20,7 +20,7 @@ reqFilename = ""
 
 def getting(sSocket):
     ackn,cAddr = sSocket.recvfrom(100)
-    print("%s recieved." % ackn)
+    
 
 print("Binding...")
 sSocket.bind(sAddr)
@@ -73,7 +73,7 @@ for line in reqFile:
         seqNumber += 1
         readSelect[sSocket](sock)
         
-        line = str(seqNumber) +":5:"+line
+        line = str(seqNumber) + ":" + str(len(line))+":"+line
         sSocket.sendto(line.encode(), cAddr)
             
 print("File sent. Sending end symbol...")

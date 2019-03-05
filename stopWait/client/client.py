@@ -18,15 +18,16 @@ request = "none"
 cSocket.setblocking(False)
 
 def getting(cSocket, reqFile):
-    ack = str(ackCounter)+":100:"+ "ACKN"
-    response, addr = cSocket.recvfrom(100)
-    print("Recieved " + str(response))
+    ack = str(ackCounter)+":"+ str(len("ACKN")) + ":ACKN"
+    msg, addr = cSocket.recvfrom(100)
+    print("Recieved " + str(msg))
     
-    if response.decode() == "#":
+    if msg.decode() == "#":
         print("File complete! Exiting...")
         exit()
-        
-    reqFile.write(response.decode())
+    msg = msg.decode()
+    seqNum, msgLen, msg = msg.split(':')
+    reqFile.write(msg)
     print("Sending " + ack)
     cSocket.sendto(ack.encode(), sAddr)
     status = "downloading"
