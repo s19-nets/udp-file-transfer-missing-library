@@ -7,6 +7,7 @@ from select import select
 import sys, os, re, time
 
 global cAddr
+global ackn
 global reqFile
 global seqNumber
 global line
@@ -20,6 +21,7 @@ reqFilename = ""
 
 def getting(sSocket):
     ackn,cAddr = sSocket.recvfrom(100)
+    return ackn
     
 
 print("Binding...")
@@ -46,6 +48,7 @@ readSelect[sSocket] = getting
 line = reqFile.readline()
 line = str(seqNumber) + ":5:" + line
 seqNumber = int(seqNumber)
+ackSequence = 0  #did we respond to this ack already?
 sSocket.sendto(line.encode(), cAddr)
 print("sent %s" % line)
 status = "sentMsg" #possible states: sending, sentMsg
@@ -71,16 +74,16 @@ for line in reqFile:
     for sock in rReady:
         tries = 0
         seqNumber += 1
-        readSelect[sSocket](sock)
-        
+        ackn = readSelect[sSocket](sock)
+        ackn = ackn.decode()
+        ackn = ackn.split(":",2)
+        ackn[0] = int(ackn[0])
+        if (ackn[0] < ackSequence):
+            break;
         line = str(seqNumber) + ":" + str(len(line))+":"+line
         sSocket.sendto(line.encode(), cAddr)
+        ackSequence = ackSequence+1
             
 print("File sent. Sending end symbol...")
 sSocket.sendto("#".encode(),cAddr)
 exit()
-
-
-        
-
-    
