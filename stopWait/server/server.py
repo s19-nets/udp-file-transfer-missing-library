@@ -13,7 +13,7 @@ global seqNumber
 global line
 
 # The address and port of the server - socket, too
-sAddr = ("",50000)
+sAddr = ("",50001)
 sSocket = socket(AF_INET, SOCK_DGRAM)
 
 # Doesn't know the name of the file yet!
@@ -48,7 +48,6 @@ readSelect[sSocket] = getting
 line = reqFile.readline()
 line = str(seqNumber) + ":5:" + line
 seqNumber = int(seqNumber)
-ackSequence = 0  #did we respond to this ack already?
 sSocket.sendto(line.encode(), cAddr)
 print("sent %s" % line)
 status = "sentMsg" #possible states: sending, sentMsg
@@ -78,12 +77,11 @@ for line in reqFile:
         ackn = ackn.decode()
         ackn = ackn.split(":",2)
         ackn[0] = int(ackn[0])
-        if (ackn[0] < ackSequence):
+        if (ackn[0] < seqNumber):
             break;
         line = str(seqNumber) + ":" + str(len(line))+":"+line
         sSocket.sendto(line.encode(), cAddr)
-        ackSequence = ackSequence+1
-            
-print("File sent. Sending end symbol...")
-sSocket.sendto("#".encode(),cAddr)
+                    
+print("File sent. Sending ending packet...")
+sSocket.sendto((str(seqNumber) + ":0:""").encode(),cAddr)
 exit()

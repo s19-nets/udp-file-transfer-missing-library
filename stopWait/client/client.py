@@ -21,12 +21,14 @@ def getting(cSocket, reqFile):
     ack = str(ackCounter)+":"+ str(len("ACKN")) + ":ACKN"
     msg, addr = cSocket.recvfrom(100)
     print("Recieved " + str(msg))
+    msg = msg.decode()
+    seqNum, msgLen, msg = msg.split(":", 2)
+    msgLen = int(msgLen)
     
-    if msg.decode() == "#":
+    if msgLen == 0 and msg == "":
         print("File complete! Exiting...")
         exit()
-    msg = msg.decode()
-    seqNum, msgLen, msg = msg.split(':')
+        
     reqFile.write(msg)
     print("Sending " + ack)
     cSocket.sendto(ack.encode(), sAddr)
